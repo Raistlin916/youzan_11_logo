@@ -112,7 +112,7 @@
         var preview = document.getElementById('preview');
         var size = 200;
         var cImage = new Image();
-        cImage.src = "./frame11.png";
+        cImage.src = "./frame11.jpg";
         canvas.width = size;
         canvas.height = size;
 
@@ -128,7 +128,7 @@
                 coverImage(uploadImage);
                 downloadBtn.className = "btn";
 
-                if (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) { //iOS = Iphone, Ipad, etc.
+                if (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) {
                     downloadBtn.className = 'hide';
                     document.querySelector('.info').className = 'info';
                 }
@@ -150,7 +150,7 @@
 
         downloadBtn.onclick =  function () {
             var dataURL = canvas.toDataURL('image/png');
-            if (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) { //iOS = Iphone, Ipad, etc.
+            if (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) {
                 this.target = "_blank";
                 this.href = dataURL;
             } else {
