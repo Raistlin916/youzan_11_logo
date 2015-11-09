@@ -127,8 +127,6 @@
             uploadImage.onload = function () {
                 coverImage(uploadImage);
                 downloadBtn.className = "btn";
-                preview.innerHTML = '';
-                preview.appendChild(uploadImage);
 
                 if (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) { //iOS = Iphone, Ipad, etc.
                     downloadBtn.className = 'hide';
@@ -141,6 +139,13 @@
             var ctx = canvas.getContext('2d');
             ctx.drawImage(image, 0, 0, size, size);
             ctx.drawImage(cImage, 0, 0, size, size);
+
+            preview.innerHTML = '';
+            var image = new Image();
+            image.src = canvas.toDataURL('image/png');
+            image.onload = function () {
+                preview.appendChild(image);
+            }
         }
 
         downloadBtn.onclick =  function () {
