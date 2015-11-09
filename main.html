@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>youzan_11_logo</title>
+</head>
+<body>
+    <input id="image_input" type="file" name="pic" accept="image/*">
+    <canvas id="canvas"></canvas>
+    <a download="avatar.png" id="download_btn">下载</a>
+
+    <script>
+        var input = document.getElementById('image_input');
+        var canvas = document.getElementById('canvas');
+        var downloadBtn = document.getElementById('download_btn');
+        var size = 200;
+        var cImage = new Image();
+        cImage.src = "./frame11.png";
+        canvas.width = size;
+        canvas.height = size;
+
+        input.onchange = function (e) {
+            var file = input.files[0];
+            var reader  = new FileReader();
+            var uploadImage = new Image();
+            reader.onloadend = function () {
+                uploadImage.src = reader.result;
+            }
+            reader.readAsDataURL(file);
+            uploadImage.onload = function () {
+                coverImage(uploadImage);
+            }
+        }
+
+        function coverImage (image) {
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(image, 0, 0, size, size);
+            ctx.drawImage(cImage, 0, 0, size, size);
+        }
+
+        downloadBtn.onclick =  function () {
+            var dt = canvas.toDataURL('image/png');
+            this.href = dt.replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+        }
+    </script>
+</body>
+</html>
