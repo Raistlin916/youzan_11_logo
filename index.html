@@ -83,6 +83,13 @@
             display: block;
             margin: 50px auto;
         }
+
+        .copyright {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -91,6 +98,8 @@
 
     <canvas id="canvas"></canvas>
     <a download="avatar.png" class="btn hide" id="download_btn">下载</a>
+
+    <p class="copyright">@pipboy</p>
 
     <script>
         var input = document.getElementById('image_input');
