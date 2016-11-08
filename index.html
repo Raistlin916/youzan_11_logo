@@ -87,6 +87,11 @@
             margin: 30px auto;
         }
 
+        #preview img {
+            width: 200px;
+            height: 200px;
+        }
+
         .copyright {
             position: absolute;
             right: 20px;
@@ -105,12 +110,13 @@
 
     <p class="copyright">@pipboy</p>
 
+    <script src="./load-image.min.js"></script>
     <script>
         var input = document.getElementById('image_input');
         var canvas = document.createElement('canvas');
         var downloadBtn = document.getElementById('download_btn');
         var preview = document.getElementById('preview');
-        var size = 200;
+        var size = 400;
         var cImage = new Image();
         cImage.src = "./frame11.png";
         canvas.width = size;
@@ -125,7 +131,7 @@
             }
             reader.readAsDataURL(file);
             uploadImage.onload = function () {
-                coverImage(uploadImage);
+                coverImage(uploadImage, file);
                 downloadBtn.className = "btn";
 
                 if (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) {
@@ -135,17 +141,60 @@
             }
         }
 
-        function coverImage (image) {
+        function coverImage (image, file) {
             var ctx = canvas.getContext('2d');
-            ctx.drawImage(image, 0, 0, size, size);
-            ctx.drawImage(cImage, 0, 0, size, size);
 
-            preview.innerHTML = '';
-            var image = new Image();
-            image.src = canvas.toDataURL('image/png');
-            image.onload = function () {
-                preview.appendChild(image);
-            }
+            getOrientation(file, function(orientation) {
+                ctx.save()
+                switch(orientation){
+                    case 2:
+                        // horizontal flip
+                        ctx.translate(canvas.width, 0);
+                        ctx.scale(-1, 1);
+                        break;
+                    case 3:
+                        // 180° rotate left
+                        ctx.translate(canvas.width, canvas.height);
+                        ctx.rotate(Math.PI);
+                        break;
+                    case 4:
+                        // vertical flip
+                        ctx.translate(0, canvas.height);
+                        ctx.scale(1, -1);
+                        break;
+                    case 5:
+                        // vertical flip + 90 rotate right
+                        ctx.rotate(0.5 * Math.PI);
+                        ctx.scale(1, -1);
+                        break;
+                    case 6:
+                        // 90° rotate right
+                        ctx.rotate(0.5 * Math.PI);
+                        ctx.translate(0, -canvas.height);
+                        break;
+                    case 7:
+                        // horizontal flip + 90 rotate right
+                        ctx.rotate(0.5 * Math.PI);
+                        ctx.translate(canvas.width, -canvas.height);
+                        ctx.scale(-1, 1);
+                        break;
+                    case 8:
+                        // 90° rotate left
+                        ctx.rotate(-0.5 * Math.PI);
+                        ctx.translate(-canvas.width, 0);
+                        break;
+                }
+                ctx.drawImage(image, 0, 0, size, size);
+                ctx.restore();
+                ctx.drawImage(cImage, 0, 0, size, size);
+
+                preview.innerHTML = '';
+                var img = new Image();
+                img.src = canvas.toDataURL('image/png');
+                img.onload = function () {
+                    preview.appendChild(img);
+                }
+            })
         }
 
         downloadBtn.onclick =  function () {
@@ -156,6 +205,34 @@
             } else {
                 this.href = dataURL.replace(/^data:image\/[^;]/, 'data:application/octet-stream');
             }
+        }
+
+        function getOrientation(file, callback) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+
+                var view = new DataView(e.target.result);
+                if (view.getUint16(0, false) != 0xFFD8) return callback(-2);
+                var length = view.byteLength, offset = 2;
+                while (offset < length) {
+                var marker = view.getUint16(offset, false);
+                offset += 2;
+                if (marker == 0xFFE1) {
+                    if (view.getUint32(offset += 2, false) != 0x45786966) return callback(-1);
+                    var little = view.getUint16(offset += 6, false) == 0x4949;
+                    offset += view.getUint32(offset + 4, little);
+                    var tags = view.getUint16(offset, little);
+                    offset += 2;
+                    for (var i = 0; i < tags; i++)
+                    if (view.getUint16(offset + (i * 12), little) == 0x0112)
+                        return callback(view.getUint16(offset + (i * 12) + 8, little));
+                }
+                else if ((marker & 0xFF00) != 0xFF00) break;
+                else offset += view.getUint16(offset, false);
+                }
+                return callback(-1);
+            };
+            reader.readAsArrayBuffer(file.slice(0, 64 * 1024));
         }
     </script>
 </body>
